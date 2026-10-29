@@ -1,0 +1,4 @@
+import { inject } from '@angular/core'; import { HttpInterceptorFn,HttpErrorResponse } from '@angular/common/http'; import { Router } from '@angular/router'; import { catchError,throwError } from 'rxjs'; import { AuthService } from '../auth/auth.service'; import { environment } from '../../../environments/environment';
+const esApi=(url:string)=>url===environment.apiUrl||url.startsWith(environment.apiUrl+'/');
+export const bearerInterceptor:HttpInterceptorFn=(req,next)=>{const token=inject(AuthService).token();return next(token&&esApi(req.url)?req.clone({setHeaders:{Authorization:'Bearer '+token}}):req);};
+export const errorInterceptor:HttpInterceptorFn=(req,next)=>{const auth=inject(AuthService),router=inject(Router);return next(req).pipe(catchError((e:HttpErrorResponse)=>{if(e.status===401&&esApi(req.url)&&!req.url.endsWith('/auth/login'))auth.salir(router.url);return throwError(()=>e);}));};

@@ -1,0 +1,1 @@
+export const menu = [{ruta:'/servicios',texto:'Servicios',permiso:'SERVICIO_LEER'},{ruta:'/vehiculos',texto:'Vehículos',permiso:'VEHICULO_LEER'},{ruta:'/ordenes',texto:'Consultar órdenes',permiso:'ORDEN_LEER'},{ruta:'/ordenes/nueva',texto:'Nueva orden',permiso:'ORDEN_REGISTRAR'},{ruta:'/reportes',texto:'Ingresos por servicio',permiso:'REPORTE_VER'}];
