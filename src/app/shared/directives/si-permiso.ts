@@ -1,2 +1,16 @@
-import { Directive,input,inject,effect,TemplateRef,ViewContainerRef } from '@angular/core';import {AuthService} from '../../core/auth/auth.service';
-@Directive({selector:'[siPermiso]'}) export class SiPermiso {siPermiso=input.required<string>();private auth=inject(AuthService);private template=inject(TemplateRef);private view=inject(ViewContainerRef);constructor(){effect(()=>{const allowed=this.auth.tiene(this.siPermiso());this.view.clear();if(allowed)this.view.createEmbeddedView(this.template);});}}
+import { Directive, input, inject, effect, TemplateRef, ViewContainerRef } from '@angular/core';
+import { AuthService } from '../../core/auth/auth.service';
+@Directive({ selector: '[siPermiso]' })
+export class SiPermiso {
+  siPermiso = input.required<string>();
+  private auth = inject(AuthService);
+  private template = inject(TemplateRef);
+  private view = inject(ViewContainerRef);
+  constructor() {
+    effect(() => {
+      const allowed = this.auth.tiene(this.siPermiso());
+      this.view.clear();
+      if (allowed) this.view.createEmbeddedView(this.template);
+    });
+  }
+}

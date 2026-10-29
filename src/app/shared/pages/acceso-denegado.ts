@@ -1,1 +1,12 @@
-import {Component} from '@angular/core';import {RouterLink} from '@angular/router';@Component({imports:[RouterLink],template:`<section class="empty-page"><span class="eyebrow">AUTOANDES / 403</span><h1>Acceso denegado</h1><p>Tu sesión está activa, pero tu cuenta no tiene permiso para esta operación.</p><a class="button primary" routerLink="/servicios">Volver a servicios</a></section>`})export class AccesoDenegado{}
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+@Component({
+  imports: [RouterLink],
+  template: `<section class="empty-page">
+    <span class="eyebrow">AUTOANDES / 403</span>
+    <h1>Acceso denegado</h1>
+    <p>Tu sesión está activa, pero tu cuenta no tiene permiso para esta operación.</p>
+    <a class="button primary" routerLink="/servicios">Volver a servicios</a>
+  </section>`,
+})
+export class AccesoDenegado {}

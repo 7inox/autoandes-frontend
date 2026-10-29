@@ -1,7 +1,137 @@
-import {Component,inject,signal} from '@angular/core';import {FormsModule} from '@angular/forms';import {CurrencyPipe} from '@angular/common';import {RouterLink} from '@angular/router';import {ServiciosService} from '../../core/services/servicios.service';import {ClientesService} from '../../core/services/clientes.service';import {Servicio,Cliente} from '../../core/models';import {AuthService} from '../../core/auth/auth.service';import {SiPermiso} from '../../shared/directives/si-permiso';
- @Component({imports:[FormsModule,RouterLink,CurrencyPipe,SiPermiso],template:`<div class="page-heading"><div><span class="eyebrow">CATÁLOGO / SERVICIOS</span><h1>Servicios del taller</h1><p class="muted">Mantén tu catálogo listo para la próxima visita.</p></div><a *siPermiso="'SERVICIO_ESCRIBIR'" class="button primary" routerLink="/servicios/nuevo">+ Nuevo servicio</a></div><section class="panel"><div class="toolbar"><input aria-label="Buscar servicio" placeholder="Buscar por código o nombre…" [(ngModel)]="busqueda"><span class="muted">{{visibles().length}} registros</span><button (click)="cargar()">Actualizar</button></div>@if(error()){<p class="error" role="alert">{{error()}}</p>}@if(mensaje()){<p class="success" role="status">{{mensaje()}}</p>}@if(loading()){<div class="empty">Cargando desde Oracle…</div>}@else{<div class="table-wrap"><table><thead><tr><th>Código</th><th>Servicio</th><th>Precio</th><th>Duración</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>@for(x of visibles();track x.id){<tr><td><strong>{{x.codigo}}</strong></td><td>{{x.nombre}}</td><td>{{x.precio|currency:'PEN':'S/ '}}</td><td>{{x.duracionMin}} min</td><td><span class="badge" [class.inactive]="!x.activo">{{x.activo?'Activo':'Inactivo'}}</span></td><td class="actions"><a *siPermiso="'SERVICIO_ESCRIBIR'" [routerLink]="['/servicios',x.id,'editar']">Editar</a><button *siPermiso="'SERVICIO_ESCRIBIR'" class="danger-text" (click)="baja(x)">{{x.activo?"Dar de baja":"Activar"}}</button><button *siPermiso="'SERVICIO_ESCRIBIR'" (click)="eliminar(x)">Eliminar</button></td></tr>}@empty{<tr><td colspan="6" class="empty">No hay registros para mostrar.</td></tr>}</tbody></table></div>}</section>`})
- export class ServiciosList {api=inject(ServiciosService);auth=inject(AuthService);items=signal<Servicio[]>([]);loading=signal(false);error=signal('');mensaje=signal('');busqueda='';visibles(){const q=this.busqueda.toLowerCase();return this.items().filter(x=>(x.codigo+' '+x.nombre).toLowerCase().includes(q));} constructor(){this.cargar();}
- cargar(){this.loading.set(true);this.error.set('');this.api.listar().subscribe({next:r=>{this.items.set(r);this.loading.set(false);},error:e=>{this.error.set(e.error?.mensaje||'No se pudo conectar con la API');this.loading.set(false);}});}
- baja(x:Servicio){if(!confirm('¿Confirmas cambiar el estado de este servicio?'))return;this.api.estado(x.id,!x.activo).subscribe({next:()=>{this.mensaje.set('Operación realizada correctamente');this.cargar();},error:e=>this.error.set(e.error?.mensaje||'No se pudo completar la operación')});}
- eliminar(x:Servicio){if(confirm("¿Eliminar físicamente este servicio?"))this.api.eliminar(x.id).subscribe({next:()=>this.cargar(),error:e=>this.error.set(e.error?.mensaje||"No se pudo eliminar")});}
- }
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CurrencyPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { ServiciosService } from '../../core/services/servicios.service';
+import { ClientesService } from '../../core/services/clientes.service';
+import { Servicio, Cliente } from '../../core/models';
+import { AuthService } from '../../core/auth/auth.service';
+import { SiPermiso } from '../../shared/directives/si-permiso';
+@Component({
+  imports: [FormsModule, RouterLink, CurrencyPipe, SiPermiso],
+  template: `<div class="page-heading">
+      <div>
+        <span class="eyebrow">CATÁLOGO / SERVICIOS</span>
+        <h1>Servicios del taller</h1>
+        <p class="muted">Mantén tu catálogo listo para la próxima visita.</p>
+      </div>
+      <a *siPermiso="'SERVICIO_ESCRIBIR'" class="button primary" routerLink="/servicios/nuevo"
+        >+ Nuevo servicio</a
+      >
+    </div>
+    <section class="panel">
+      <div class="toolbar">
+        <input
+          aria-label="Buscar servicio"
+          placeholder="Buscar por código o nombre…"
+          [(ngModel)]="busqueda"
+        /><span class="muted">{{ visibles().length }} registros</span
+        ><button (click)="cargar()">Actualizar</button>
+      </div>
+      @if (error()) {
+        <p class="error" role="alert">{{ error() }}</p>
+      }
+      @if (mensaje()) {
+        <p class="success" role="status">{{ mensaje() }}</p>
+      }
+      @if (loading()) {
+        <div class="empty">Cargando desde Oracle…</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Servicio</th>
+                <th>Precio</th>
+                <th>Duración</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (x of visibles(); track x.id) {
+                <tr>
+                  <td>
+                    <strong>{{ x.codigo }}</strong>
+                  </td>
+                  <td>{{ x.nombre }}</td>
+                  <td>{{ x.precio | currency: 'PEN' : 'S/ ' }}</td>
+                  <td>{{ x.duracionMin }} min</td>
+                  <td>
+                    <span class="badge" [class.inactive]="!x.activo">{{
+                      x.activo ? 'Activo' : 'Inactivo'
+                    }}</span>
+                  </td>
+                  <td class="actions">
+                    <a
+                      *siPermiso="'SERVICIO_ESCRIBIR'"
+                      [routerLink]="['/servicios', x.id, 'editar']"
+                      >Editar</a
+                    ><button *siPermiso="'SERVICIO_ESCRIBIR'" class="danger-text" (click)="baja(x)">
+                      {{ x.activo ? 'Dar de baja' : 'Activar' }}</button
+                    ><button *siPermiso="'SERVICIO_ESCRIBIR'" (click)="eliminar(x)">
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="empty">No hay registros para mostrar.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>`,
+})
+export class ServiciosList {
+  api = inject(ServiciosService);
+  auth = inject(AuthService);
+  items = signal<Servicio[]>([]);
+  loading = signal(false);
+  error = signal('');
+  mensaje = signal('');
+  busqueda = '';
+  visibles() {
+    const q = this.busqueda.toLowerCase();
+    return this.items().filter((x) => (x.codigo + ' ' + x.nombre).toLowerCase().includes(q));
+  }
+  constructor() {
+    this.cargar();
+  }
+  cargar() {
+    this.loading.set(true);
+    this.error.set('');
+    this.api.listar().subscribe({
+      next: (r) => {
+        this.items.set(r);
+        this.loading.set(false);
+      },
+      error: (e) => {
+        this.error.set(e.error?.mensaje || 'No se pudo conectar con la API');
+        this.loading.set(false);
+      },
+    });
+  }
+  baja(x: Servicio) {
+    if (!confirm('¿Confirmas cambiar el estado de este servicio?')) return;
+    this.api.estado(x.id, !x.activo).subscribe({
+      next: () => {
+        this.mensaje.set('Operación realizada correctamente');
+        this.cargar();
+      },
+      error: (e) => this.error.set(e.error?.mensaje || 'No se pudo completar la operación'),
+    });
+  }
+  eliminar(x: Servicio) {
+    if (confirm('¿Eliminar físicamente este servicio?'))
+      this.api
+        .eliminar(x.id)
+        .subscribe({
+          next: () => this.cargar(),
+          error: (e) => this.error.set(e.error?.mensaje || 'No se pudo eliminar'),
+        });
+  }
+}
